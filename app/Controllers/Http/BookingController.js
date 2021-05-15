@@ -38,24 +38,25 @@ class BookingController {
       let data = []
       let materials = []
       request = request.all()
-      request.data.forEach(async (item) => {
+      for (const item of request.data) {
         const validation = await validate(item, {
           material: 'required|array',
           qty: 'required|integer|min:1'
         })
         if (validation.fails()) {
           error = error + 1
-          item['error'] = validation.messages;
+          item['error'] = validation.messages()[0].message
         } else if (materials.includes(item['material']['id'])) {
           item['error'] = 'material already exists'
           error = error + 1
         }
         data.push(item)
         materials.push(item['material']['id'])
-      })
+      }
 
       if (!error) {
           await this.storeBooking(request, auth)
+          return response.json({message: 'UPDATED'})
       }
       response.status(422).json(data)
   }
@@ -124,7 +125,7 @@ class BookingController {
       })
       if (validation.fails()) {
         error = error + 1
-        item['error'] = validation.messages;
+        item['error'] = validation.messages()[0].message
       }
       data.push(item)
     }
