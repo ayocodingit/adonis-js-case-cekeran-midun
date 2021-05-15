@@ -56,7 +56,7 @@ class BookingController {
 
       if (!error) {
           await this.storeBooking(request, auth)
-          return response.json({message: 'UPDATED'})
+          return response.json({message: 'CREATED'})
       }
       response.status(422).json(data)
   }
