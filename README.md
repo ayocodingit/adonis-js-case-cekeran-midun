@@ -1,5 +1,7 @@
 # Adonis API application
 
+<a href="https://codeclimate.com/github/ayocodingit/adonis-js-case-cekeran-midun/maintainability"><img src="https://api.codeclimate.com/v1/badges/6353efca8a938cd1a993/maintainability" /></a>
+
 This is the boilerplate for creating an API server in AdonisJs, it comes pre-configured with.
 
 1. Bodyparser
