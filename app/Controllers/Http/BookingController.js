@@ -5,6 +5,7 @@ const Database = use('Database')
 const Document = use('App/Models/Document')
 const Material = use('App/Models/Material')
 const { validate } = use('Validator')
+const moment = require('moment')
 
 /**
  * Resourceful controller for interacting with bookings
@@ -46,12 +47,12 @@ class BookingController {
         if (validation.fails()) {
           error = error + 1
           item['error'] = validation.messages()[0].message
-        } else if (materials.includes(item['material']['id'])) {
+        } else if (materials.includes(item['material_id'])) {
           item['error'] = 'material already exists'
           error = error + 1
         }
         data.push(item)
-        materials.push(item['material']['id'])
+        materials.push(item['material_id'])
       }
 
       if (!error) {
@@ -66,14 +67,14 @@ class BookingController {
     try {
       const document = new Document
       document.reference_number = request.reference_number
-      document.date = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+      document.date = moment().format('Y-M-D')
       document.branch_id = await auth.getUser().id
       document.description = request.description
       document.status = 'reserved'
       await document.save(trx)
 
       for (const item of request.data) {
-        const material = await Material.findOrFail(item['material']['id'])
+        const material = await Material.findOrFail(item['material_id'])
         const booking = new Booking
         booking.material_id = material.id
         booking.name = material.name

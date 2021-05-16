@@ -12,6 +12,10 @@ class Document extends Model {
    booking() {
      return this.hasMany('App/Models/Booking')
    }
+
+   sale() {
+     return this.hasOne('App/Models/Sale')
+   }
 }
 
 module.exports = Document

@@ -7,7 +7,6 @@ class AuthController {
   async login({ request, response, auth  }) {
      const { email, password } = request.all()
      const token = await auth
-                            .authenticator('jwt')
                             .withRefreshToken()
                             .attempt(email, password)
      response.json(token)

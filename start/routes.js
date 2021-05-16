@@ -16,9 +16,8 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.get('/', () => {
-    return { app: 'Cekeran midun' }
-})
+Route.get('/', 'HomeController.index')
+Route.get('/api/', 'HomeController.index')
 
 Route.group(() => {
   Route.post('login', 'AuthController.login')
@@ -33,3 +32,9 @@ Route.group(() => {
   Route.put('/:id', 'BookingController.update')
   Route.get('/:id', 'BookingController.show')
 }).prefix('api/booking').middleware('auth')
+
+Route.group(() => {
+  Route.get('material', 'ListController.material')
+  Route.get('document', 'ListController.document')
+  Route.get('branch', 'ListController.branch')
+}).prefix('api/list').middleware('auth')
