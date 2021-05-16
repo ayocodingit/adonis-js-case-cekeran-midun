@@ -5,17 +5,25 @@ const Model = use('Model')
 
 class Document extends Model {
 
-   branch() {
-     return this.belongsTo('App/Models/Branch')
-   }
+  static get dates() {
+    return super.dates.concat(['date'])
+  }
 
-   booking() {
-     return this.hasMany('App/Models/Booking')
-   }
+  static formatDates(field, value) {
+    return super.formatDates(field, value)
+  }
 
-   sale() {
-     return this.hasOne('App/Models/Sale')
-   }
+  branch() {
+    return this.belongsTo('App/Models/Branch')
+  }
+
+  booking() {
+    return this.hasMany('App/Models/Booking')
+  }
+
+  sale() {
+    return this.hasOne('App/Models/Sale')
+  }
 }
 
 module.exports = Document

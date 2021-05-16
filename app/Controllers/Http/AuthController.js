@@ -1,6 +1,7 @@
 'use strict'
 
 const User = use('App/Models/User')
+const Branch = use('App/Models/Branch')
 
 class AuthController {
 
@@ -28,7 +29,9 @@ class AuthController {
 
   async profile({ response, auth }) {
     try {
-      return await auth.getUser()
+      const user = await auth.getUser()
+      user.branch = await Branch.find(user.branch_id)
+      return user
     } catch (error) {
       response.json({error: 'Missing or invalid jwt token'})
     }

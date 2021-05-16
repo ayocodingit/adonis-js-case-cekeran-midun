@@ -17,20 +17,22 @@ class ListController {
 
   async document({ response, auth }) {
     const user = await auth.getUser()
-    const document = Document.query().with(['branch'])
+    const document = Document.query().with('branch')
     let data
     if (user.role === 'branch') {
       data = await document.where('branch_id', user.branch_id)
-                      .with(['booking', 'sale'])
-                      .where('date', moment().format('Y-M-D'))
+                      .with('booking')
+                      .with('sale')
+                      .where('date', moment().format('Y-MM-D'))
                       .first()
     } else if (user.role === 'ceo') {
       data = await document.where('status', 'closed')
                       .fetch()
     } else {
-      data = await document.where('date', moment().format('Y-M-D'))
+      data = await document.where('date', moment().format('Y-MM-D'))
                       .fetch()
     }
+
     response.json(data)
   }
 

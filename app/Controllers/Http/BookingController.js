@@ -20,7 +20,6 @@ class BookingController {
    */
   async index ({ response }) {
       const material = await Material.query()
-                              .select(['name as material'])
                               .whereIn('name', ['Ceker', 'Mie', 'Bihun', 'Sosis Ori'])
                               .fetch()
       response.json(material);
@@ -41,18 +40,18 @@ class BookingController {
       request = request.all()
       for (const item of request.data) {
         const validation = await validate(item, {
-          material: 'required|array',
+          material: 'required',
           qty: 'required|integer|min:1'
         })
         if (validation.fails()) {
           error = error + 1
           item['error'] = validation.messages()[0].message
-        } else if (materials.includes(item['material_id'])) {
+        } else if (materials.includes(item['material'].id)) {
           item['error'] = 'material already exists'
           error = error + 1
         }
         data.push(item)
-        materials.push(item['material_id'])
+        materials.push(item['material'].id)
       }
 
       if (!error) {
@@ -67,14 +66,14 @@ class BookingController {
     try {
       const document = new Document
       document.reference_number = request.reference_number
-      document.date = moment().format('Y-M-D')
-      document.branch_id = await auth.getUser().id
+      document.date = moment()
+      document.branch_id = (await auth.getUser()).branch_id
       document.description = request.description
-      document.status = 'reserved'
+      document.status = 'booking'
       await document.save(trx)
 
       for (const item of request.data) {
-        const material = await Material.findOrFail(item['material_id'])
+        const material = await Material.findOrFail(item['material'].id)
         const booking = new Booking
         booking.material_id = material.id
         booking.name = material.name
@@ -102,8 +101,10 @@ class BookingController {
   async show ({ params, response}) {
       const document = await Document
                                     .query()
-                                    .with(['branch', 'booking.material'])
-                                    .findOrFail(params.id)
+                                    .with('branch')
+                                    .with('booking.material')
+                                    .where('id', params.id)
+                                    .first()
       response.json(document)
   }
 
@@ -120,7 +121,7 @@ class BookingController {
     let data = []
     request = request.all()
     for (const item of request.data) {
-      const max = await Booking.findOrFail(item['id']).qty
+      const max = (await Booking.findOrFail(item['id'])).qty
       const validation = await validate(item, {
         qty: 'required|integer|min:1|max:' + max
       })
@@ -142,20 +143,21 @@ class BookingController {
   async updateBooking(request, id) {
     const trx = await Database.beginTransaction()
     try {
-      let sell = 0
+      let spending = 0
       for (const item of request.data) {
         const booking = await Booking.findOrFail(item['id'])
         booking.qty = item['qty']
         await booking.save(trx)
-        sell = sell + booking.qty * booking.price
+        spending = spending + booking.qty * booking.price
       }
       const document = await Document.findOrFail(id)
       document.status = 'received'
-      document.sell = sell
+      document.spending = spending
       await document.save(trx)
       await trx.commit()
     } catch (error) {
       await trx.rollback()
+      console.log(error);
       throw error
     }
   }

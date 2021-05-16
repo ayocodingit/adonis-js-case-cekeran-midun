@@ -38,3 +38,7 @@ Route.group(() => {
   Route.get('document', 'ListController.document')
   Route.get('branch', 'ListController.branch')
 }).prefix('api/list').middleware('auth')
+
+Route.group(() => {
+  Route.put('/:id', 'SaleController.update')
+}).prefix('api/sale').middleware('auth')
