@@ -25,24 +25,11 @@ class SaleController {
   async updateSale(request, id) {
     const trx = await Database.beginTransaction()
     try {
-       const document = await Document
-                                    .query()
-                                    .with('booking')
-                                    .with('sale')
-                                    .where('id', id)
-                                    .first()
-       let sale
+       const document = await Document.query().with('booking').with('sale').where('id', id).first()
        request.tax = parseInt(request.tax.replace('%', ''))
        request.document_id = document.id
-       if (document.toJSON().sale != null) {
-          sale = await document.sale().first()
-          sale.fill(request)
-          await sale.save(trx)
-       } else {
-          sale = await Sale.create(request, trx)
-       }
+       const sale = await Sale.create(request, trx)
        const sell = sale.net_income
-       console.log(document);
        await document.findOrFail(id).update({
           sell: sell,
           status: 'closed',
@@ -52,7 +39,6 @@ class SaleController {
        await trx.commit()
     } catch (error) {
       await trx.rollback()
-      console.log(error);
       throw error
     }
   }
